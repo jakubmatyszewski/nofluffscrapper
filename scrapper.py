@@ -68,7 +68,7 @@ class Scrapper():
             if req in stack:
                 reqs[i] = 1
             elif req in nonos:
-                reqs[i] = 0
+                return False
             else:
                 self.not_specified.append(req)
                 reqs[i] = 0
@@ -78,23 +78,41 @@ class Scrapper():
             print(driver.find_element_by_id('posting-header').text)
             print(driver.find_element_by_tag_name('nfj-posting-salaries').text)
             print(f'Suited in {rate:.2f}\n')
-            if len(self.not_specified) > 0:
-                print(f'You have not specified your prefference towards \
-following requirements:\n{self.not_specified}\n\n')
+            return True
+        return False
 
     def check_offers(self, stack, nonos):
-        offers = driver.find_elements_by_class_name('posting-title__position')
-        for i in range(len(offers)):
-            self.check_if_on_list_view()
-            offer = driver.\
-                find_elements_by_class_name('posting-title__position')[i]
-            driver.execute_script(f"window.scrollTo(0, {offer.rect['y']-200})")
-            offer.click()
-            self.check_if_in_offer()
-            self.check_if_i_am_suited(my_stack, no_no)
-            driver.execute_script("window.history.go(-1)")
+        is_it_last_page = False
+        while is_it_last_page is False:
+            offers = driver.find_elements_by_class_name(
+                'posting-title__position')
+            for i in range(len(offers)):
+                self.check_if_on_list_view()
+                offer = driver.\
+                    find_elements_by_class_name('posting-title__position')[i]
+                driver.execute_script(
+                    f"window.scrollTo(0, {offer.rect['y']-200})")
+                offer.click()
+                self.check_if_in_offer()
+                self.check_if_i_am_suited(my_stack, no_no)
+                driver.execute_script("window.history.go(-1)")
+            driver.execute_script(
+                    f"window.scrollTo(0, document.body.scrollHeight)")
+            time.sleep(0.5)
+            is_it_last_page = self.page_flipping()
         print(f'Could you reconsider some of this skills?\n\
 {list(set(self.not_specified))}')
+
+    def page_flipping(self):
+        page_links = driver.find_elements_by_class_name('page-link')
+        for i, page in enumerate(page_links):
+            if 'current' in page.text:
+                current_page = page.text.split('\n')[0]
+                if page_links[i+1].text == '»':
+                    return True
+                else:
+                    page_links[i+1].click()
+                    return False
 
 
 if __name__ == "__main__":

@@ -4,7 +4,6 @@ This selenium script visits `https://nofluffjobs.com/` and based on my criteria 
 
 
 Todo:
-- [ ] Go through all pages
 - [ ] Skip offers that were already scanned
 - [ ] Send email with selected offers
 - [ ] Improve speed (avoid entering each offer and backing to list page loop)
