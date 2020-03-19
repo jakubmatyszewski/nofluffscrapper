@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.keys import Keys
 import time
 
 MAX_WAIT = 10
@@ -21,6 +22,10 @@ def wait(fn):
 class Scrapper():
     def __init__(self):
         self.not_specified = []
+
+    @wait
+    def wait_for(self, fn):
+        return fn()
 
     def get_filters_done(
                         self,
@@ -50,17 +55,22 @@ class Scrapper():
 
     @wait
     def check_if_in_offer(self):
-        crumbs = driver.find_element_by_tag_name('nfj-posting-breadcrumbs')
+        x = []
+        crumbs = driver.find_elements_by_tag_name('nfj-posting-breadcrumbs')
+        assert len(crumbs) > 0
 
     @wait
     def check_if_on_list_view(self):
         jobs = driver.find_elements_by_class_name('posting-title__position')
         assert len(jobs) > 0
 
+    @wait
     def get_requirements(self):
+        reqs = []
         for re in driver.find_elements_by_tag_name('nfj-posting-requirements'):
-            return [button.text.lower()
-                    for button in re.find_elements_by_tag_name('button')]
+            reqs += [button.text.lower()
+                     for button in re.find_elements_by_tag_name('button')]
+        return reqs
 
     def check_if_i_am_suited(self, stack, nonos=[]):
         reqs = self.get_requirements()
@@ -84,20 +94,22 @@ class Scrapper():
     def check_offers(self, stack, nonos):
         is_it_last_page = False
         while is_it_last_page is False:
-            offers = driver.find_elements_by_class_name(
-                'posting-title__position')
+            offers = driver.find_elements_by_class_name('posting-list-item')
             for i in range(len(offers)):
                 self.check_if_on_list_view()
-                offer = driver.\
-                    find_elements_by_class_name('posting-title__position')[i]
+                link = offers[i].get_property('href')
                 driver.execute_script(
-                    f"window.scrollTo(0, {offer.rect['y']-200})")
-                offer.click()
+                    f"window.scrollTo(0, {offers[i].rect['y']-200})")
+                driver.execute_script(f"window.open('{link}');")
+                driver.switch_to_window(driver.window_handles[1])
                 self.check_if_in_offer()
+                time.sleep(0.5)
                 self.check_if_i_am_suited(my_stack, no_no)
-                driver.execute_script("window.history.go(-1)")
+                driver.close()
+                driver.switch_to_window(driver.window_handles[0])
+
             driver.execute_script(
-                    f"window.scrollTo(0, document.body.scrollHeight)")
+                f"window.scrollTo(0, document.body.scrollHeight)")
             time.sleep(0.5)
             is_it_last_page = self.page_flipping()
         print(f'Could you reconsider some of this skills?\n\
