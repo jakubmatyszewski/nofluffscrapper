@@ -4,5 +4,4 @@ This selenium script visits `https://nofluffjobs.com/` and based on my criteria 
 
 
 Todo:
-- [ ] Send email with selected offers
 - [ ] Skip offers that were already scanned(?)

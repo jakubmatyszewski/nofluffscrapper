@@ -1,5 +1,13 @@
 {
 	"location": ["warszawa"],
 	"category": ["devops"],
-	"seniority": ["trainee", "junior"]
+	"seniority": ["trainee", "junior"],
+	"stack": [
+                "docker", "bash", "python", "linux", "windows", "english",
+                "polish", "git", "shell", "team player", "communication skills",
+                "attention to detail", "analytical skills", "excel",
+                "critical thinking", "selenium", "sql", "team player",
+                "proactivity", "problem solving", "jenkins"
+                ],
+	"no_stack": ["java", "ruby", "typescript", "android"]
 }
