@@ -1,0 +1,13 @@
+---
+version: "3"
+services:
+  selenium:
+    image: selenium/standalone-firefox
+    ports:
+      - 4444:4444
+
+  scrapper:
+    build: .
+    restart: on-failure
+    depends_on: 
+      - selenium

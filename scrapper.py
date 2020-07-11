@@ -3,7 +3,6 @@ import json
 import argparse
 import logging
 from selenium import webdriver
-from pyvirtualdisplay import Display
 
 from app.core import Scrapper
 import app.mail
@@ -30,16 +29,6 @@ def read_options(config_path="config.json"):
 
 
 if __name__ == "__main__":
-    try:
-        display = os.environ["DISPLAY"]
-    except KeyError:
-        display_found = False
-        display = Display(visible=0, size=(800, 600))
-        display.start()
-        logging.info('Initialized virtual display..')
-    else:
-        display_found = True
-
     web_scrap = Scrapper()
     location, category, seniority, stack, no_stack = read_options()
     web_scrap.get_filters_done(location, seniority, category)
@@ -51,6 +40,3 @@ if __name__ == "__main__":
     logging.info('Finished script..')
     web_scrap.close_browser()
     logging.info('Closed browser..')
-    if display_found is False:
-        display.stop()
-        logging.info('Closed virtual display..')

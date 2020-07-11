@@ -1,10 +1,9 @@
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 import time
 
-MAX_WAIT = 10
+MAX_WAIT = 60
 URL = 'https://nofluffjobs.com/'
 
 
@@ -14,10 +13,10 @@ def wait(fn):
         while True:
             try:
                 return fn(*args, **kwargs)
-            except (AssertionError, WebDriverException) as e:
+            except Exception as e:
                 if time.time() - start_time > MAX_WAIT:
                     raise e
-                time.sleep(0.5)
+                time.sleep(1)
     return modified_fn
 
 
@@ -29,10 +28,11 @@ class Scrapper:
         self.open_browser()
         self.set_language_to_english()
 
+    @wait
     def open_browser(self):
-        options = Options()
-        options.headless = True
-        self.driver = webdriver.Firefox(options=options)
+        self.driver = webdriver.Remote(
+            "http://selenium:4444/wd/hub",
+            DesiredCapabilities.FIREFOX)
         self.driver.get(URL)
 
     def close_browser(self):
