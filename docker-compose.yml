@@ -1,13 +1,31 @@
 ---
 version: "3"
 services:
-  selenium:
-    image: selenium/standalone-firefox
+  flask:
+    build: "./web"
+    environment:
+      SEND_HOST: scrapper
+      SEND_PORT: 5555
     ports:
-      - 4444:4444
+       - "5000:5000"
+    volumes:
+      - "./web:/app"
 
   scrapper:
-    build: .
-    restart: on-failure
-    depends_on: 
+    build: "./scrapper"
+    depends_on:
       - selenium
+    environment:
+      LISTEN_HOST: '0.0.0.0'
+      LISTEN_PORT: 5555
+    volumes:
+      - "./scrapper:/scrapper"
+
+  selenium:
+    image: "selenium/standalone-firefox"
+    ports:
+      - "4444:4444"
+    shm_size: "2gb"
+
+  redis:
+    image: "redis:6.0.5-alpine"

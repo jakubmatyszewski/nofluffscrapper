@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <nav>
+      <h1>nofluffscrapper</h1>
+    </nav>
+    <section class="content">
+      {% for key, value in items.items() %}
+      <form action="" method="POST">
+        <div class="">{{ key }}</div>
+        <ul>
+          {% for element, checked in value.items() %}
+            <li>
+              <input type="checkbox" id="{{ element }}" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
+              <label for={{ element }} class="">{{ element }}</label>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      <input type="Submit" value="Submit"/>
+    </form>
+    </section>
+  </body>
+</html>

@@ -4,10 +4,13 @@ import argparse
 import logging
 from selenium import webdriver
 
-from app.core import Scrapper
-import app.mail
+from core import Scrapper
+import mail
 
 logging.getLogger().setLevel(logging.INFO)
+
+#####
+# Remove when Flask integration is done.
 parser = argparse.ArgumentParser()
 parser.add_argument('--no_email',
                     action='store_false',
@@ -28,15 +31,16 @@ def read_options(config_path="config.json"):
         return _location, _category, _seniority, _stack, _no_stack
 
 
-if __name__ == "__main__":
+def run_scrapper():
+    print("run_scrapper inside", flush=True)
     web_scrap = Scrapper()
     location, category, seniority, stack, no_stack = read_options()
     web_scrap.get_filters_done(location, seniority, category)
     web_scrap.check_offers(stack, no_stack)
     if EMAIL is not False:
-        app.mail.send_report(web_scrap.report)
+        mail.send_report(web_scrap.report)
     else:
-        app.mail.write_txt_report(web_scrap.report)
+        mail.write_txt_report(web_scrap.report)
     logging.info('Finished script..')
     web_scrap.close_browser()
     logging.info('Closed browser..')
