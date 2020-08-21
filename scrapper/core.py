@@ -59,7 +59,7 @@ class Scrapper:
 
     def get_filters_done(
                         self,
-                        cities=['Warszawa'],
+                        cities=['warszawa'],
                         seniority=['trainee', 'junior'],
                         categories=[]
                         ):

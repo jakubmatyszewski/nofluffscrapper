@@ -2,6 +2,7 @@ import os
 import json
 import argparse
 import logging
+import redis
 from selenium import webdriver
 
 from core import Scrapper
@@ -18,6 +19,9 @@ parser.add_argument('--no_email',
                           Report will be saved in txt file.")
 args = parser.parse_args()
 EMAIL = args.no_email
+
+
+redis_client = redis.Redis(host='redis')
 
 
 def read_options(config_path="config.json"):
