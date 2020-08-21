@@ -36,7 +36,6 @@ def home():
                     except KeyError:
                         results[k] = [r]
 
-        # print(results, flush=True)
         # Save configuration to file
         with open('/app/form_config.json', 'w', encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False)
@@ -45,19 +44,19 @@ def home():
         redis_data = json.dumps(results)
         redis_client.set("form_config", redis_data)
 
-        test = redis_client.get("form_config")
-        result = json.loads(test)
-        print(result, flush=True)
-
+        # Call scrapper
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((HOST, PORT))
         sock.sendall(b"Start scrapper.")
         sock.close()
 
     # If user has made config file, then use it to populate template.
-    # Recreate based on file
-    if os.path.isfile("/app/form_config.json"):
-        with open('/app/form_config.json') as f:
-            data = json.load(f)
+    if redis_client.get("form_config"):
+        results = json.loads(redis_client.get("form_config"))
+        for rv in results.values():
+            for r in rv:
+                for k, v in data.items():
+                    if r.title() in v:
+                        data[k][r.title()] = "on"
 
     return render_template("index.html", items=data)

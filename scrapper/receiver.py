@@ -13,9 +13,7 @@ s.listen(3)
 while True:
     conn, addr = s.accept()
     data = conn.recv(1024)
-    if data == "Start scrapper.":
-        print("Now the script should run.")
+    if data == b"Start scrapper.":
         run_scrapper()
-        print("Now the script should end.")
     conn.close()
     print("received data from sender: %s" % (data))
