@@ -2,13 +2,26 @@
 <html>
   <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        $('a#process_input').bind('click', function() {
+        $.getJSON('/config_stack', {
+          stack: $('input[name="stack"]').val(),
+        }, function(data) {
+          $("#result").text(data.result);
+        });
+        return false;
+        });
+      });
+    </script>
   </head>
   <body>
     <nav>
       <h1>nofluffscrapper</h1>
     </nav>
-    <section class="content">
-      {% for key, value in items.items() %}
+    <section class="filters">
+      {% for key, value in form_items.items() %}
       <form action="" method="POST">
         <div class="">{{ key }}</div>
         <ul>
@@ -22,6 +35,14 @@
       {% endfor %}
       <input type="Submit" value="Submit"/>
     </form>
+    </section>
+    <section class="stack" style="margin-top: 40px;">
+      <form action="" method="POST">
+      <div>Define your skills:</div>
+      <input type="text" name="stack">
+      <a href="#" id="process_input"><button>Submit</button></a>
+    </form>
+    <p id="result"></p>
     </section>
   </body>
 </html>

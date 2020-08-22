@@ -2,7 +2,7 @@ import os
 import json
 import socket
 import redis
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, jsonify
 
 bp = Blueprint('bp', __name__, template_folder='templates')
 HOST = os.getenv('SEND_HOST')
@@ -59,4 +59,16 @@ def home():
                     if r.title() in v:
                         data[k][r.title()] = "on"
 
-    return render_template("index.html", items=data)
+    return render_template("index.html", form_items=data)
+
+
+@bp.route('/config_stack')
+def config_stack():
+    try:
+        stack = request.args.get('stack', 0, type=str)
+        if stack.lower() == 'python':
+            return jsonify(result='Nice.')
+        else:
+            return jsonify(result='Still nice.')
+    except Exception as e:
+        return str(e)

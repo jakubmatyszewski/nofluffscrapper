@@ -1,9 +1,7 @@
-import os
 import json
 import argparse
 import logging
 import redis
-from selenium import webdriver
 
 from core import Scrapper
 import mail

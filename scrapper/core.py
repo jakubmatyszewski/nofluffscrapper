@@ -57,12 +57,11 @@ class Scrapper:
         [button for button in self.driver.find_elements_by_class_name('btn-link')
          if button.text == 'Apply'][0].click()
 
-    def get_filters_done(
-                        self,
-                        cities=['warszawa'],
-                        seniority=['trainee', 'junior'],
-                        categories=[]
-                        ):
+    def get_filters_done(self,
+                         cities=['warszawa'],
+                         seniority=['trainee', 'junior'],
+                         categories=[]
+                         ):
         filters = self.driver.find_elements_by_class_name('filter-name')
         for filtr in filters:
             if filtr.text == 'Location':
@@ -129,7 +128,7 @@ class Scrapper:
             else:
                 self.not_specified.append(req)
                 reqs[i] = 0
-        rate = sum(reqs)/len(reqs)
+        rate = sum(reqs) / len(reqs)
         if rate > 0.5:
             # print(self.get_description())
             # print(f'Suited in {rate:.2f}\n')
@@ -163,10 +162,8 @@ class Scrapper:
     def page_flipping(self):
         page_links = self.driver.find_elements_by_class_name('page-link')
         for i, page in enumerate(page_links):
-            if 'current' in page.text:
-                current_page = page.text.split('\n')[0]
-                if page_links[i+1].text == '»':
-                    return True
-                else:
-                    page_links[i+1].click()
-                    return False
+            if page_links[i + 1].text == '»':
+                return True
+            else:
+                page_links[i + 1].click()
+                return False
