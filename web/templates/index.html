@@ -13,47 +13,70 @@
           stack: $('input[name="stack"]').val(),
         }, function(data) {
           if (data.result.startsWith('-')){
-            $("#result").append("<span class='negative'>"+data.result.slice(1,)+"</span>");
+            $("#result").append("<span class='skill negative'>"+data.result.slice(1,)+"</span>");
           } else {
-            $("#result").append("<span>"+data.result+"</span>");
+            $("#result").append("<span class='skill positive'>"+data.result+"</span>");
           }
         });
+        return false;
+        });
+      });
+
+      $(function() {
+        $('.skill').bind('click', function() {
+        if ($(this).hasClass('negative')){
+          $(this).remove();
+          $.getJSON('/remove_skill', {
+            skill: "-"+$(this).text(),
+          });
+        } else {
+          $(this).remove();
+          $.getJSON('/remove_skill', {
+            skill: $(this).text(),
+          });
+        }
         return false;
         });
       });
     </script>
   </head>
   <body>
-    <nav>
-      <h1>nofluffscrapper</h1>
-    </nav>
-    <section class="filters">
-      {% for key, value in form_items.items() %}
-      <form action="" method="POST">
-        <h2 class="">{{ key }}</h2>
-        <ul>
-          {% for element, checked in value.items() %}
-            <li>
-              <input type="checkbox" id="{{ element }}" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
-              <label for={{ element }} class="">{{ element }}</label>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endfor %}
-      <input type="Submit" value="Submit"/>
-    </form>
-    </section>
-    <section class="stack" style="margin-top: 40px;">
-      <form action="" method="POST">
-        <h2>Skills</h2>
-        <p id="result">
-        {% for key, value in stack_items.items() %}
-            <span {% if value == "0"%} class="negative" {% endif %}>{{ key }}</span>
+    <div class="container">
+      <nav>
+        <h1>nofluffscrapper</h1>
+      </nav>
+      <section class="filters">
+        {% for key, value in form_items.items() %}
+        <form action="" method="POST">
+          <h2 class="">{{ key }}</h2>
+          <ul>
+            {% for element, checked in value.items() %}
+              <li>
+                <input type="checkbox" id="{{ element }}" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
+                <label for={{ element }} class="">{{ element }}</label>
+              </li>
+            {% endfor %}
+          </ul>
         {% endfor %}
-        </p>
-        <input type="text" name="stack">
-        <a href="#" id="process_input"><button>Submit</button></a>
+        <input type="Submit" value="Submit"/>
       </form>
-    </section>
+      </section>
+      <section class="stack" style="margin-top: 40px;">
+        <form action="" method="POST">
+          <h2>Skills</h2>
+          <p id="result">
+          {% for key, value in stack_items.items() %}
+              {% if value == "0"%}
+                <span class="skill negative">{{- key[1:] -}}</span>
+              {% else %}
+                <span class="skill positive">{{ key }}</span>
+              {% endif %}
+          {% endfor %}
+          </p>
+          <input type="text" name="stack">
+          <a href="#" id="process_input"><button>Submit</button></a>
+        </form>
+      </section>
+    </div>
   </body>
 </html>

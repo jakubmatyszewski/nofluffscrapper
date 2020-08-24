@@ -2,12 +2,26 @@
 
 li { display: inline-block; }
 
-#result span {
-    background-color: #2196f3;
+.skill {
     border-radius: 10px;
     color: #fff;
+    cursor: pointer;
     margin: 0 5px;
     padding: 5px 5px;
+    transition: .3s ease-in;
 }
 
-#result .negative { background-color: #ff6058; }
+.positive { background-color: #2196f3; }
+.negative { background-color: #ff6058; }
+
+.positive:hover {
+    color: #2196f3;
+    background-color: #fff;
+    box-shadow: 0 0 0 1px #2196f3;
+}
+
+.negative:hover {
+    color: #ff6058;
+    background-color: #fff;
+    box-shadow: 0 0 0 1px #ff6058;
+}

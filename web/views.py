@@ -59,9 +59,9 @@ def home():
 
     stack = {}
     for key in redis_client.scan_iter('stack:*'):
+        print(key, flush=True)
         if (stack_key := redis_client.get(key)):
             stack[key.split(':')[-1]] = stack_key
-    print(stack, flush=True)
 
     return render_template("index.html", form_items=data, stack_items=stack)
 
@@ -71,10 +71,23 @@ def config_stack():
     try:
         stack = request.args.get('stack', 0, type=str).lower()
         if stack.startswith('-'):
-            redis_client.set(f'stack:{stack[1:]}', 0)
+            redis_client.set(f'stack:{stack.strip()}', 0)
             return jsonify(result=stack)
         else:
-            redis_client.set(f'stack:{stack}', 1)
+            redis_client.set(f'stack:{stack.strip()}', 1)
             return jsonify(result=stack)
+    except Exception as e:
+        return str(e)
+
+
+@bp.route('/remove_skill')
+def remove_skill():
+    try:
+        skill = request.args.get('skill', 0, type=str)
+        print(skill, flush=True)
+        print(f'removing: stack:{skill}', flush=True)
+        redis_client.delete(f'stack:{skill}')
+        print('removed', flush=True)
+        return jsonify(removed=True)
     except Exception as e:
         return str(e)
