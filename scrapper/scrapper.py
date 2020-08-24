@@ -34,7 +34,6 @@ def read_options(config_path="config.json"):
 
 
 def run_scrapper():
-    print("run_scrapper inside", flush=True)
     web_scrap = Scrapper()
     location, category, seniority, stack, no_stack = read_options()
     web_scrap.get_filters_done(location, seniority, category)

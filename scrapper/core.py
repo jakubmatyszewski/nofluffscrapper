@@ -160,10 +160,12 @@ class Scrapper:
 {list(set(self.not_specified))}')
 
     def page_flipping(self):
-        page_links = self.driver.find_elements_by_class_name('page-link')
-        for i, page in enumerate(page_links):
-            if page_links[i + 1].text == '»':
-                return True
-            else:
-                page_links[i + 1].click()
-                return False
+        try:
+            last_page = self.driver.find_elements_by_class_name('page-link')[-2]
+            for i in range(2, int(last_page.text)):
+                page_link = self.driver.find_element_by_xpath("//*[contains(text(), '{}') and @class='page-link']".format(i))
+                page_link.click()
+            return True
+        except ValueError:
+            print('Just one page available.')
+            return True
