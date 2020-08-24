@@ -8,7 +8,9 @@ bp = Blueprint('bp', __name__, template_folder='templates')
 HOST = os.getenv('SEND_HOST')
 PORT = int(os.getenv('SEND_PORT'))
 
-redis_client = redis.Redis(host='redis')
+redis_client = redis.Redis(host='redis',
+                           charset="utf-8",
+                           decode_responses=True)
 
 
 def read_form_data():
@@ -36,10 +38,6 @@ def home():
                     except KeyError:
                         results[k] = [r]
 
-        # Save configuration to file
-        with open('/app/form_config.json', 'w', encoding="utf8") as f:
-            json.dump(data, f, ensure_ascii=False)
-
         # Save configuration to redis
         redis_data = json.dumps(results)
         redis_client.set("form_config", redis_data)
@@ -59,16 +57,24 @@ def home():
                     if r.title() in v:
                         data[k][r.title()] = "on"
 
-    return render_template("index.html", form_items=data)
+    stack = {}
+    for key in redis_client.scan_iter('stack:*'):
+        if (stack_key := redis_client.get(key)):
+            stack[key.split(':')[-1]] = stack_key
+    print(stack, flush=True)
+
+    return render_template("index.html", form_items=data, stack_items=stack)
 
 
 @bp.route('/config_stack')
 def config_stack():
     try:
-        stack = request.args.get('stack', 0, type=str)
-        if stack.lower() == 'python':
-            return jsonify(result='Nice.')
+        stack = request.args.get('stack', 0, type=str).lower()
+        if stack.startswith('-'):
+            redis_client.set(f'stack:{stack[1:]}', 0)
+            return jsonify(result=stack)
         else:
-            return jsonify(result='Still nice.')
+            redis_client.set(f'stack:{stack}', 1)
+            return jsonify(result=stack)
     except Exception as e:
         return str(e)

@@ -1,1 +1,13 @@
+* { font-family: 'Lato', sans-serif; }
+
 li { display: inline-block; }
+
+#result span {
+    background-color: #2196f3;
+    border-radius: 10px;
+    color: #fff;
+    margin: 0 5px;
+    padding: 5px 5px;
+}
+
+#result .negative { background-color: #ff6058; }

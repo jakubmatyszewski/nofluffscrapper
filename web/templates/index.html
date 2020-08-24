@@ -1,6 +1,9 @@
 <!doctype html>
 <html>
   <head>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript">
@@ -9,7 +12,11 @@
         $.getJSON('/config_stack', {
           stack: $('input[name="stack"]').val(),
         }, function(data) {
-          $("#result").text(data.result);
+          if (data.result.startsWith('-')){
+            $("#result").append("<span class='negative'>"+data.result.slice(1,)+"</span>");
+          } else {
+            $("#result").append("<span>"+data.result+"</span>");
+          }
         });
         return false;
         });
@@ -23,7 +30,7 @@
     <section class="filters">
       {% for key, value in form_items.items() %}
       <form action="" method="POST">
-        <div class="">{{ key }}</div>
+        <h2 class="">{{ key }}</h2>
         <ul>
           {% for element, checked in value.items() %}
             <li>
@@ -38,11 +45,15 @@
     </section>
     <section class="stack" style="margin-top: 40px;">
       <form action="" method="POST">
-      <div>Define your skills:</div>
-      <input type="text" name="stack">
-      <a href="#" id="process_input"><button>Submit</button></a>
-    </form>
-    <p id="result"></p>
+        <h2>Skills</h2>
+        <p id="result">
+        {% for key, value in stack_items.items() %}
+            <span {% if value == "0"%} class="negative" {% endif %}>{{ key }}</span>
+        {% endfor %}
+        </p>
+        <input type="text" name="stack">
+        <a href="#" id="process_input"><button>Submit</button></a>
+      </form>
     </section>
   </body>
 </html>
