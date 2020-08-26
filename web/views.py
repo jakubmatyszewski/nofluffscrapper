@@ -59,7 +59,6 @@ def home():
 
     stack = {}
     for key in redis_client.scan_iter('stack:*'):
-        print(key, flush=True)
         if (stack_key := redis_client.get(key)):
             stack[key.split(':')[-1]] = stack_key
 
@@ -84,10 +83,7 @@ def config_stack():
 def remove_skill():
     try:
         skill = request.args.get('skill', 0, type=str)
-        print(skill, flush=True)
-        print(f'removing: stack:{skill}', flush=True)
         redis_client.delete(f'stack:{skill}')
-        print('removed', flush=True)
         return jsonify(removed=True)
     except Exception as e:
         return str(e)

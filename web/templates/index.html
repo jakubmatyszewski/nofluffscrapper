@@ -14,15 +14,21 @@
         }, function(data) {
           if (data.result.startsWith('-')){
             $("#result").append("<span class='skill negative'>"+data.result.slice(1,)+"</span>");
+            skills_removable();
           } else {
             $("#result").append("<span class='skill positive'>"+data.result+"</span>");
+            skills_removable();
           }
         });
         return false;
         });
       });
 
-      $(function() {
+      $( document ).ready(function() {
+        skills_removable();
+      });
+      
+      function skills_removable() {
         $('.skill').bind('click', function() {
         if ($(this).hasClass('negative')){
           $(this).remove();
@@ -37,7 +43,7 @@
         }
         return false;
         });
-      });
+      }
     </script>
   </head>
   <body>
