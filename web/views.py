@@ -60,7 +60,7 @@ def home():
     stack = {}
     for key in redis_client.scan_iter('stack:*'):
         if (stack_key := redis_client.get(key)):
-            stack[key.split(':')[-1]] = stack_key
+            stack[''.join(key.split(':')[1:])] = stack_key
 
     return render_template("index.html", form_items=data, stack_items=stack)
 

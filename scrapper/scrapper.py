@@ -19,18 +19,35 @@ args = parser.parse_args()
 EMAIL = args.no_email
 
 
-redis_client = redis.Redis(host='redis')
+redis_client = redis.Redis(host='redis',
+                           charset="utf-8",
+                           decode_responses=True)
 
 
-def read_options(config_path="config.json"):
-    with open(config_path) as f:
-        config = json.load(f)
-        _location = config['location']
-        _category = config['category']
-        _seniority = config['seniority']
-        _stack = config['stack']
-        _no_stack = config['no_stack']
-        return _location, _category, _seniority, _stack, _no_stack
+def read_options():
+    if redis_client.get("form_config"):
+        config = json.loads(redis_client.get("form_config"))
+        try:
+            _location = config['location']
+        except KeyError:
+            _location = []
+        try:
+            _category = config['category']
+        except KeyError:
+            _category = []
+        try:
+            _seniority = config['seniority']
+        except KeyError:
+            _seniority = []
+
+    _no_stack, _stack = [], []
+    for key in redis_client.scan_iter('stack:*'):
+        if (skill := ''.join(key.split(':')[1:]).startswith('-')):
+            _no_stack.append(skill)
+        else:
+            skill = ''.join(key.split(':')[1:])
+            _stack.append(skill)
+    return _location, _category, _seniority, _stack, _no_stack
 
 
 def run_scrapper():
