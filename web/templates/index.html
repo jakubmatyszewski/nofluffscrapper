@@ -12,12 +12,21 @@
         $.getJSON('/config_stack', {
           stack: $('input[name="stack"]').val(),
         }, function(data) {
-          if (data.result.startsWith('-')){
-            $("#result").append("<span class='skill negative'>"+data.result.slice(1,)+"</span>");
-            skills_removable();
+          var skill = data.result
+          if (skill.startsWith('-')){
+            if($("#result").text().indexOf(skill.slice(1,)) > -1){
+              alert(skill+' is already in the list.')
+            } else {
+              $("#result").append("<span class='skill negative'>"+skill.slice(1,)+"</span>");
+              skills_removable();
+            }
           } else {
-            $("#result").append("<span class='skill positive'>"+data.result+"</span>");
-            skills_removable();
+            if($("#result").text().indexOf(skill) > -1){
+              alert(skill+' is already in the list.')
+            } else {
+              $("#result").append("<span class='skill positive'>"+skill+"</span>");
+              skills_removable();
+            }
           }
         });
         return false;
