@@ -1,27 +1,123 @@
 * { font-family: 'Lato', sans-serif; }
 
+html {
+
+}
+
+hr { border-top: 1px dashed #777; }
+
 li { display: inline-block; }
 
-.skill {
+.panel {
+    border: 0;
+}
+
+.panel-group .panel {
+    border: 0;
+    border-bottom: 1px solid #000;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.panel-default > .panel-heading {
+    background: 0;
+    padding: 10px 0;
+}
+
+.panel-title { font-size: 30px; }
+.panel-title a,
+.panel-title a:hover {
+    text-decoration: none;
+}
+
+.filter-item__input { display: none; }
+
+.filter-item__input + label {
+    border: 1px solid #000;
     border-radius: 10px;
-    color: #fff;
+    color: #000;
     cursor: pointer;
-    margin: 0 5px;
+    font-weight: normal;
+    margin: 5px;
     padding: 5px 5px;
     transition: .3s ease-in;
 }
 
-.positive { background-color: #2196f3; }
-.negative { background-color: #ff6058; }
+.filter-item__input:checked + label {
+    background-color: #000;
+    color: #fff;
+}
+
+.skill {
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+    margin: 4px;
+    padding: 5px 5px;
+    transition: .3s ease-in;
+}
+
+.positive { 
+    border: 1px solid #000;
+    color: #000;
+}
+.negative { 
+    border: 1px solid #de0f00;
+    color: #de0f00;
+}
 
 .positive:hover {
-    color: #2196f3;
-    background-color: #fff;
-    box-shadow: 0 0 0 1px #2196f3;
+    color: #fff;
+    background-color: #000;
 }
 
 .negative:hover {
-    color: #ff6058;
-    background-color: #fff;
-    box-shadow: 0 0 0 1px #ff6058;
+    color: #fff;
+    background-color: #de0f00;
+}
+
+.skill-submit__wrapper {
+    max-width: 200px;
+    position: relative;
+}
+
+.skill-submit__input {
+    border: 0;
+    border-bottom: 1px solid #000;
+    width: 100%;
+}
+.skill-submit__input:focus {
+    outline: 0;
+}
+
+#process_input {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.skill-submit__button {
+    border: 0;
+    /*border-right: 1px solid #000;*/
+    background: none;
+    color: #222;
+}
+
+#start-button {
+    background: #000;
+    border: 1px solid #000;
+    border-radius: 25px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+    font-weight: bold;
+    margin: 40px;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    transition: .3s ease-in;
+}
+
+#start-button:focus {
+    outline: 0;
 }

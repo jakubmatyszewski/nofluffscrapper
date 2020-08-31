@@ -2,10 +2,10 @@
 <html>
   <head>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script type="text/javascript">
       $(function() {
         $('a#process_input').bind('click', function() {
@@ -15,17 +15,19 @@
           var skill = data.result
           if (skill.startsWith('-')){
             if($("#result").text().indexOf(skill.slice(1,)) > -1){
-              alert(skill+' is already in the list.')
+              showSkillAlert();
             } else {
               $("#result").append("<span class='skill negative'>"+skill.slice(1,)+"</span>");
-              skills_removable();
+              clearTextInput();
+              listenSkillsChange();
             }
           } else {
             if($("#result").text().indexOf(skill) > -1){
-              alert(skill+' is already in the list.')
+              showSkillAlert();
             } else {
               $("#result").append("<span class='skill positive'>"+skill+"</span>");
-              skills_removable();
+              clearTextInput();
+              listenSkillsChange();
             }
           }
         });
@@ -34,10 +36,10 @@
       });
 
       $( document ).ready(function() {
-        skills_removable();
+        listenSkillsChange();
       });
       
-      function skills_removable() {
+      function listenSkillsChange() {
         $('.skill').bind('click', function() {
         if ($(this).hasClass('negative')){
           $(this).remove();
@@ -52,7 +54,18 @@
         }
         return false;
         });
-      }
+      };
+
+      function clearTextInput() {
+        $('#skill-input').val('');
+      };
+
+      function showSkillAlert() {
+        $('.skill-error').fadeIn(200);
+        setTimeout(function(){
+          $('.skill-error').fadeOut(500);
+        }, 1500);
+      };
     </script>
   </head>
   <body>
@@ -60,23 +73,7 @@
       <nav>
         <h1>nofluffscrapper</h1>
       </nav>
-      <section class="filters">
-        {% for key, value in form_items.items() %}
-        <form action="" method="POST">
-          <h2 class="">{{ key }}</h2>
-          <ul>
-            {% for element, checked in value.items() %}
-              <li>
-                <input type="checkbox" id="{{ element }}" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
-                <label for={{ element }} class="">{{ element }}</label>
-              </li>
-            {% endfor %}
-          </ul>
-        {% endfor %}
-        <input type="Submit" value="Submit"/>
-      </form>
-      </section>
-      <section class="stack" style="margin-top: 40px;">
+      <section class="stack" style="margin-bottom: 40px;">
         <form action="" method="POST">
           <h2>Skills</h2>
           <p id="result">
@@ -88,9 +85,46 @@
               {% endif %}
           {% endfor %}
           </p>
-          <input type="text" name="stack">
-          <a href="#" id="process_input"><button>Submit</button></a>
+          <div class="skill-submit__wrapper">
+            <input id="skill-input" class="skill-submit__input" type="text" name="stack">
+            <a href="#" id="process_input" style=""><button class="skill-submit__button"><span class="glyphicon glyphicon-chevron-right
+" aria-hidden="true"></span></button></a>
+          </div>
+          <span class="skill-error" style="display: none;">
+            This skill is already in the list!
+          </span>
         </form>
+      </section>
+      <hr>
+      <section class="filters">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          {% for key, value in form_items.items() %}
+          <form action="" method="POST">
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab" id="heading{{ key.lower() }}">
+                <h2 class="panel-title">
+                  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ key.lower() }}" aria-expanded="false" aria-controls="collapse{{ key.lower() }}">
+                    {{ key }}
+                  </a>
+                </h2>
+              </div>
+              <div id="collapse{{ key.lower() }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ key.lower() }}">
+                <div class="panel-body">
+                  <ul>
+                    {% for element, checked in value.items() %}
+                      <li>
+                        <input type="checkbox" id="{{ element|replace(' ', '') }}" class="filter-item__input" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
+                        <label for="{{ element|replace(' ', '') }}">{{ element }}</label>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+          <input type="Submit" id="start-button" value="Search"/>
+        </form>
+      </div>
       </section>
     </div>
   </body>
