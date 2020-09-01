@@ -115,7 +115,12 @@ li { display: inline-block; }
     margin: 40px;
     padding: 10px 20px;
     text-transform: uppercase;
-    transition: .3s ease-in;
+    transition: .2s ease-in;
+}
+
+#start-button:hover {
+    background-color: #fff;
+    color: #000;
 }
 
 #start-button:focus {

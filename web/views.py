@@ -69,7 +69,9 @@ def home():
 def config_stack():
     try:
         stack = request.args.get('stack', 0, type=str).lower()
-        if stack.startswith('-'):
+        if len(stack) == 0:
+            pass
+        elif stack.startswith('-'):
             redis_client.set(f'stack:{stack.strip()}', 0)
             return jsonify(result=stack)
         else:
