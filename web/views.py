@@ -62,7 +62,13 @@ def home():
         if (stack_key := redis_client.get(key)):
             stack[''.join(key.split(':')[1:])] = stack_key
 
-    return render_template("index.html", form_items=data, stack_items=stack)
+    suggested_skills = [redis_client.get(s)
+                        for s in redis_client.scan_iter('skillproposal:*')]
+
+    return render_template("index.html",
+                           form_items=data,
+                           stack_items=stack,
+                           suggested_skills=suggested_skills)
 
 
 @bp.route('/config_stack')
@@ -77,6 +83,16 @@ def config_stack():
         else:
             redis_client.set(f'stack:{stack.strip()}', 1)
             return jsonify(result=stack)
+    except Exception as e:
+        return str(e)
+
+
+@bp.route('/add_suggested_skill')
+def add_suggested_skill():
+    try:
+        skill = request.args.get('skill', 0, type=str).lower()
+        redis_client.set(f'stack:{skill.strip()}', 1)
+        redis_client.delete(f'skillproposal:{skill}')
     except Exception as e:
         return str(e)
 

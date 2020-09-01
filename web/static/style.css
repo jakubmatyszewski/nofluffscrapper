@@ -49,7 +49,9 @@ li { display: inline-block; }
 }
 
 .skill {
+    border: 1px solid #000;
     border-radius: 10px;
+    color: #000;
     cursor: pointer;
     display: inline-block;
     margin: 4px;
@@ -57,18 +59,15 @@ li { display: inline-block; }
     transition: .3s ease-in;
 }
 
-.positive { 
-    border: 1px solid #000;
-    color: #000;
+
+.skill:hover {
+    color: #fff;
+    background-color: #000;
 }
+
 .negative { 
     border: 1px solid #de0f00;
     color: #de0f00;
-}
-
-.positive:hover {
-    color: #fff;
-    background-color: #000;
 }
 
 .negative:hover {
@@ -101,6 +100,10 @@ li { display: inline-block; }
     /*border-right: 1px solid #000;*/
     background: none;
     color: #222;
+}
+
+.error-container {
+    min-height: 30px;
 }
 
 #start-button {

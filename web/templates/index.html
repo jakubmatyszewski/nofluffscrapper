@@ -38,7 +38,18 @@
       $( document ).ready(function() {
         listenSkillsChange();
       });
-      
+     
+     $(function(){
+      $('.suggested').bind('click', function(){
+          $.getJSON('/add_suggested_skill', {
+            skill: $(this)[0].innerText,
+          });
+          $("#result").append("<span class='skill positive'>"+$(this)[0].innerText+"</span>");
+          $(this).remove();
+          listenSkillsChange();
+      })
+     });
+
       function listenSkillsChange() {
         $('.skill').bind('click', function() {
         if ($(this).hasClass('negative')){
@@ -46,7 +57,7 @@
           $.getJSON('/remove_skill', {
             skill: "-"+$(this).text(),
           });
-        } else {
+        } else if ($(this).hasClass('positive')) {
           $(this).remove();
           $.getJSON('/remove_skill', {
             skill: $(this).text(),
@@ -90,9 +101,16 @@
             <a href="#" id="process_input" style=""><button class="skill-submit__button"><span class="glyphicon glyphicon-chevron-right
 " aria-hidden="true"></span></button></a>
           </div>
-          <span class="skill-error" style="display: none;">
-            This skill is already in the list!
-          </span>
+          <div class="error-container">
+            <span class="skill-error" style="display: none;">
+              This skill is already in the list!
+            </span>
+          </div>
+          <div class="sugested-skills">
+            {% for item in suggested_skills %}
+              <span class="skill suggested">{{ item }}</span>
+            {% endfor%}
+          </div>
         </form>
       </section>
       <hr>

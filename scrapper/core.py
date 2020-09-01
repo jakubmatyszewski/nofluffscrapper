@@ -1,10 +1,14 @@
+import time
+import redis
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common.keys import Keys
-import time
 
 MAX_WAIT = 60
 URL = 'https://nofluffjobs.com/'
+
+redis_client = redis.Redis(host='redis',
+                           charset="utf-8",
+                           decode_responses=True)
 
 
 def wait(fn):
@@ -130,8 +134,6 @@ class Scrapper:
                 reqs[i] = 0
         rate = sum(reqs) / len(reqs)
         if rate > 0.5:
-            # print(self.get_description())
-            # print(f'Suited in {rate:.2f}\n')
             self.report.append(f"{self.get_description()}\nSuited in {rate:.2f}/1.\n\n")
         return False
 
@@ -156,6 +158,8 @@ class Scrapper:
                 f"window.scrollTo(0, document.body.scrollHeight)")
             time.sleep(0.5)
             is_it_last_page = self.page_flipping()
+        for skill in self.not_specified:
+            redis_client.set(f'skillproposal:{skill}', skill)
         print(f'Could you reconsider some of this skills?\n\
 {list(set(self.not_specified))}')
 
