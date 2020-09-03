@@ -75,6 +75,11 @@ li { display: inline-block; }
     background-color: #de0f00;
 }
 
+.refresh {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
 .skill-submit__wrapper {
     max-width: 200px;
     position: relative;

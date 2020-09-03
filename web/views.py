@@ -1,8 +1,9 @@
 import os
 import json
 import socket
+import random
 import redis
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, app
 
 bp = Blueprint('bp', __name__, template_folder='templates')
 HOST = os.getenv('SEND_HOST')
@@ -11,6 +12,8 @@ PORT = int(os.getenv('SEND_PORT'))
 redis_client = redis.Redis(host='redis',
                            charset="utf-8",
                            decode_responses=True)
+
+app.current_pag = []
 
 
 def read_form_data():
@@ -62,13 +65,10 @@ def home():
         if (stack_key := redis_client.get(key)):
             stack[''.join(key.split(':')[1:])] = stack_key
 
-    suggested_skills = [redis_client.get(s)
-                        for s in redis_client.scan_iter('skillproposal:*')]
-
     return render_template("index.html",
                            form_items=data,
                            stack_items=stack,
-                           suggested_skills=suggested_skills)
+                           )
 
 
 @bp.route('/config_stack')
@@ -93,6 +93,8 @@ def add_suggested_skill():
         skill = request.args.get('skill', 0, type=str).lower()
         redis_client.set(f'stack:{skill.strip()}', 1)
         redis_client.delete(f'skillproposal:{skill}')
+        app.current_pag.remove(skill)
+        return jsonify(result=app.current_pag)
     except Exception as e:
         return str(e)
 
@@ -105,3 +107,35 @@ def remove_skill():
         return jsonify(removed=True)
     except Exception as e:
         return str(e)
+
+
+@bp.route('/paginate_suggestions')
+def paginate_suggestions():
+    all_skills = [redis_client.get(s)
+                  for s in redis_client.scan_iter('skillproposal:*')]
+    available_suggestions = all_skills
+
+    if len(all_skills) <= 5:
+        pagination = len(all_skills)
+    else:
+        pagination = 5
+
+    if len(app.current_pag) == 0:
+        app.current_pag = random.sample(all_skills, pagination)
+        return jsonify(result=app.current_pag)
+    else:
+        for skill in app.current_pag:
+            if skill in all_skills:
+                available_suggestions.remove(skill)
+
+        if len(app.current_pag) < pagination:
+            try:
+                # Populate displayed suggestions with new one
+                new_suggestion = random.sample(available_suggestions, 1)
+                app.current_pag.append(new_suggestion[0])
+            except ValueError:  # No more suggestions
+                pass
+        else:
+            app.current_pag = random.sample(all_skills, pagination)
+
+        return jsonify(result=app.current_pag)
