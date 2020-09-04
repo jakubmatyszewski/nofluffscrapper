@@ -33,8 +33,7 @@ def home():
             for k, v in data.items():
                 # v here is a dict, eg. {'remote': 'off'}
                 # thus following line extracts true value
-                v = [i.lower() for i in v.keys()]  # standarize casing
-                r, k = (x.lower() for x in [r, k])  # standarize casing
+                v = [i for i in v.keys()]
                 if r in v:
                     try:
                         results[k].append(r)
@@ -57,8 +56,8 @@ def home():
         for rv in results.values():
             for r in rv:
                 for k, v in data.items():
-                    if r.title() in v:
-                        data[k][r.title()] = "on"
+                    if r in v:
+                        data[k][r] = "on"
 
     stack = {}
     for key in redis_client.scan_iter('stack:*'):
