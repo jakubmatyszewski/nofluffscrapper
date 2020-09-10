@@ -27,28 +27,29 @@ def home():
     data = read_form_data()
 
     if request.method == 'POST':
-        results = {}
-        form_output = request.form.keys()
-        for r in form_output:
-            for k, v in data.items():
-                # v here is a dict, eg. {'remote': 'off'}
-                # thus following line extracts true value
-                v = [i for i in v.keys()]
-                if r in v:
-                    try:
-                        results[k].append(r)
-                    except KeyError:
-                        results[k] = [r]
+        if request.form:
+            results = {}
+            form_output = request.form.keys()
+            for r in form_output:
+                for k, v in data.items():
+                    # v here is a dict, eg. {'remote': 'off'}
+                    # thus following line extracts true value
+                    v = [i for i in v.keys()]
+                    if r in v:
+                        try:
+                            results[k].append(r)
+                        except KeyError:
+                            results[k] = [r]
 
-        # Save configuration to redis
-        redis_data = json.dumps(results)
-        redis_client.set("form_config", redis_data)
+            # Save configuration to redis
+            redis_data = json.dumps(results)
+            redis_client.set("form_config", redis_data)
 
-        # Call scrapper
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((HOST, PORT))
-        sock.sendall(b"Start scrapper.")
-        sock.close()
+            # Call scrapper
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((HOST, PORT))
+            sock.sendall(b"Start scrapper.")
+            sock.close()
 
     # If user has made config file, then use it to populate template.
     if redis_client.get("form_config"):
