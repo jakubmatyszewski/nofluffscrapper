@@ -28,15 +28,15 @@ def read_options():
     if redis_client.get("form_config"):
         config = json.loads(redis_client.get("form_config"))
         try:
-            _location = config['location']
+            _location = config['Location']
         except KeyError:
             _location = []
         try:
-            _category = config['category']
+            _category = config['Category']
         except KeyError:
             _category = []
         try:
-            _seniority = config['seniority']
+            _seniority = config['Seniority']
         except KeyError:
             _seniority = []
 
@@ -51,6 +51,7 @@ def read_options():
 
 
 def run_scrapper():
+    logging.info('Running script..')
     web_scrap = Scrapper()
     location, category, seniority, stack, no_stack = read_options()
     web_scrap.get_filters_done(location, seniority, category)

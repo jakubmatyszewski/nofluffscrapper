@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import redis
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -77,19 +78,19 @@ class Scrapper:
 
         location.click()
         for button in self.driver.find_elements_by_class_name('filters-btn'):
-            if button.text.lower() in cities:
+            if button.text in cities:
                 button.click()
         self.apply_button()
 
         category.click()
         for button in self.driver.find_elements_by_class_name('filters-btn'):
-            if button.text.lower() in categories:
+            if button.text in categories:
                 button.click()
         self.apply_button()
 
         more.click()
         for level in seniority:
-            self.driver.find_element_by_xpath(f"//label[@for='{level}']").click()
+            self.driver.find_element_by_xpath(f"//label[@for='{level.lower()}']").click()
         self.apply_button()
 
     @wait
@@ -134,7 +135,10 @@ class Scrapper:
                 reqs[i] = 0
         rate = sum(reqs) / len(reqs)
         if rate > 0.5:
-            self.report.append(f"{self.get_description()}\nSuited in {rate:.2f}/1.\n\n")
+            now = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
+            description = self.get_description()
+            self.report.append(f"{description}\nSuited in {rate:.2f}/1.\n\n")
+            redis_client.hset(f'result:{now}', 'description', description)
         return False
 
     def check_offers(self, stack, nonos):
@@ -160,16 +164,16 @@ class Scrapper:
             is_it_last_page = self.page_flipping()
         for skill in self.not_specified:
             redis_client.set(f'skillproposal:{skill}', skill)
-        print(f'Could you reconsider some of this skills?\n\
-{list(set(self.not_specified))}')
 
     def page_flipping(self):
         try:
             last_page = self.driver.find_elements_by_class_name('page-link')[-2]
             for i in range(2, int(last_page.text)):
                 page_link = self.driver.find_element_by_xpath("//*[contains(text(), '{}') and @class='page-link']".format(i))
+                self.driver.execute_script(
+                    f"window.scrollTo(0, {page_link.rect['y']-200})")
                 page_link.click()
             return True
-        except ValueError:
+        except Exception as e:
             print('Just one page available.')
             return True
