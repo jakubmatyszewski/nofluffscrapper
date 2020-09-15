@@ -76,11 +76,18 @@ def results():
     data = {}
     for key in redis_client.scan_iter('result:*'):
         if (description := redis_client.hgetall(key)):
-            key = key.split('result:')[1]
-            data[key] = {'url': description['url'],
-                         'salary': description['salary'],
-                         'company': description['company'],
-                         'position': description['position']}
+            key = key.split('result:')[1]  # Key format is "%d/%m/%Y-%H:%M:%S"
+            date, hour = key.split('-')  # Split key to date and hour
+            try:
+                data[date]
+            except KeyError:
+                data[date] = []
+
+            data[date].append({'url': description['url'],
+                               'salary': description['salary'],
+                               'company': description['company'],
+                               'position': description['position'],
+                               'hour': hour})
 
     return render_template("results.html", results=data)
 

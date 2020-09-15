@@ -2,11 +2,17 @@
 {% block content %}
 <section class="stack" style="margin-bottom: 40px;">
   {% for key, value in results.items() %}
-    <h1>{{key}}</h1>
-    <a href="{{value['url']}}">
-      <p>{{value['position']}} @ {{value['company']}}</p>
-    </a>
-    <div>{{value['salary']}}</div>
+    <h1>{{ key }}</h1>
+    {% for offer in value %}
+      <div>
+        <a href="{{offer['url']}}">
+          <p class="result-offer">{{ offer['position'] }} @ {{ offer['company'] }}</p>
+        </a>
+      </div>
+      <div>{{ offer['salary'] }}</div>
+      <time>{{ key }} - {{ offer['hour'] }}</time>
+      <hr>
+    {% endfor %}
   {% endfor %}
 </section>
 {% endblock %}
