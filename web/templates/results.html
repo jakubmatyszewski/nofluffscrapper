@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="stack" style="margin-bottom: 40px;">
+  {% for key, value in results.items() %}
+    <h1>{{key}}</h1>
+    <a href="{{value['url']}}">
+      <p>{{value['position']}} @ {{value['company']}}</p>
+    </a>
+    <div>{{value['salary']}}</div>
+  {% endfor %}
+</section>
+{% endblock %}

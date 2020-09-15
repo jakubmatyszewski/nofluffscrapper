@@ -1,192 +1,178 @@
-<!doctype html>
-<html>
-  <head>
-    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script type="text/javascript">
-      $(function() {
-        $('a#process_input').bind('click', function() {
-        $.getJSON('/config_stack', {
-          stack: $('input[name="stack"]').val(),
-        }, function(data) {
-          var skill = data.result
-          if (skill.startsWith('-')){
-            if($("#result").text().indexOf(skill.slice(1,)) > -1){
-              showSkillAlert();
-            } else {
-              $("#result").append("<span class='skill negative'>"+skill.slice(1,)+"</span>");
-              clearTextInput();
-              listenSkillsChange();
-            }
-          } else {
-            if($("#result").text().indexOf(skill) > -1){
-              showSkillAlert();
-            } else {
-              $("#result").append("<span class='skill positive'>"+skill+"</span>");
-              clearTextInput();
-              listenSkillsChange();
-            }
-          }
-        });
-        return false;
-        });
-      });
-
-      $( document ).ready(function() {
-        listenSkillsChange();
-        paginateSuggestions();
-        $('.refresh').on('click', function(){
-          $('.refresh svg').animateRotate(360, 500);
-          paginateSuggestions();
-        });
-      });
-     
-
-     function paginateSuggestions(){
-      $('.suggested-skills').empty();
-      $.getJSON('/paginate_suggestions', function(data) {
-            $(data.result).each(function(index){
-              $(".suggested-skills").append("<span class='skill suggested'>"+this+"</span>");
-            });
-            useSuggestions();
-          });
-     };
-
-     function useSuggestions(){
-      $('.suggested').bind('click', function(){
-          $.get('/add_suggested_skill', {
-            skill: $(this)[0].innerText,
-          });
-          $("#result").append("<span class='skill positive'>"+$(this)[0].innerText+"</span>");
-          $(this).remove();
-          listenSkillsChange();
-          paginateSuggestions();
-      })
-     };
-
-      function listenSkillsChange() {
-        $('.skill').bind('click', function() {
-        if ($(this).hasClass('negative')){
-          $(this).remove();
-          $.getJSON('/remove_skill', {
-            skill: "-"+$(this).text(),
-          });
-        } else if ($(this).hasClass('positive')) {
-          $(this).remove();
-          $.getJSON('/remove_skill', {
-            skill: $(this).text(),
-          });
-        }
-        return false;
-        });
-      };
-
-      function clearTextInput() {
-        $('#skill-input').val('');
-      };
-
-      function showSkillAlert() {
-        $('.skill-error').fadeIn(200);
-        setTimeout(function(){
-          $('.skill-error').fadeOut(500);
-        }, 1500);
-      };
-
-      $.fn.animateRotate = function(angle, duration, easing, complete) {
-        return this.each(function() {
-          var $elem = $(this);
-
-          $({deg: 0}).animate({deg: angle}, {
-            duration: duration,
-            easing: easing,
-            step: function(now) {
-              $elem.css({
-                 transform: 'rotate(' + now + 'deg)'
-               });
-            },
-            complete: complete || $.noop
-          });
-        });
-      };
-    </script>
-  </head>
-  <body>
-    <div class="container">
-      <nav>
-        <h1>nofluffscrapper</h1>
-      </nav>
-      <section class="stack" style="margin-bottom: 40px;">
-        <form action="" method="POST">
-          <h2>Skills</h2>
-          <p id="result">
-          {% for key, value in stack_items.items() %}
-              {% if value == "0"%}
-                <span class="skill negative">{{- key[1:] -}}</span>
-              {% else %}
-                <span class="skill positive">{{ key }}</span>
-              {% endif %}
-          {% endfor %}
-          </p>
-          <div class="skill-submit__wrapper">
-            <input id="skill-input" class="skill-submit__input" type="text" name="stack">
-            <a href="#" id="process_input" style=""><button class="skill-submit__button"><span class="glyphicon glyphicon-chevron-right
+{% extends "base.html" %}
+{% block content %}
+<section class="stack" style="margin-bottom: 40px;">
+  <form action="" method="POST">
+    <h2>Skills</h2>
+    <p id="result">
+    {% for key, value in stack_items.items() %}
+        {% if value == "0"%}
+          <span class="skill negative">{{- key[1:] -}}</span>
+        {% else %}
+          <span class="skill positive">{{ key }}</span>
+        {% endif %}
+    {% endfor %}
+    </p>
+    <div class="skill-submit__wrapper">
+      <input id="skill-input" class="skill-submit__input" type="text" name="stack">
+      <a href="#" id="process_input" style=""><button class="skill-submit__button"><span class="glyphicon glyphicon-chevron-right
 " aria-hidden="true"></span></button></a>
-          </div>
-          <div class="error-container">
-            <span class="skill-error" style="display: none;">
-              This skill is already in the list!
-            </span>
-          </div>
-          <div>
-            Suggested skills
-            <span class="refresh">
-              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-clockwise" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-              </svg>
-            </span> 
-          </div>
-          <div class="suggestions">
-            <span class="suggested-skills">
-
-            </span>
-          </div>
-        </form>
-      </section>
-      <hr>
-      <section class="filters">
-        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-          {% for key, value in form_items.items() %}
-          <form action="" method="POST">
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab" id="heading{{ key.lower() }}">
-                <h2 class="panel-title">
-                  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ key.lower() }}" aria-expanded="false" aria-controls="collapse{{ key.lower() }}">
-                    {{ key }}
-                  </a>
-                </h2>
-              </div>
-              <div id="collapse{{ key.lower() }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ key.lower() }}">
-                <div class="panel-body">
-                  <ul>
-                    {% for element, checked in value.items() %}
-                      <li>
-                        <input type="checkbox" id="{{ element|replace(' ', '') }}" class="filter-item__input" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
-                        <label for="{{ element|replace(' ', '') }}">{{ element }}</label>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-          <input type="Submit" id="start-button" value="Search"/>
-        </form>
-      </div>
-      </section>
     </div>
-  </body>
-</html>
+    <div class="error-container">
+      <span class="skill-error" style="display: none;">
+        This skill is already in the list!
+      </span>
+    </div>
+    <div>
+      Suggested skills
+      <span class="refresh">
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-clockwise" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+          <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+        </svg>
+      </span> 
+    </div>
+    <div class="suggestions">
+      <span class="suggested-skills">
+
+      </span>
+    </div>
+  </form>
+</section>
+<hr>
+<section class="filters">
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {% for key, value in form_items.items() %}
+    <form action="" method="POST">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading{{ key.lower() }}">
+          <h2 class="panel-title">
+            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ key.lower() }}" aria-expanded="false" aria-controls="collapse{{ key.lower() }}">
+              {{ key }}
+            </a>
+          </h2>
+        </div>
+        <div id="collapse{{ key.lower() }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ key.lower() }}">
+          <div class="panel-body">
+            <ul>
+              {% for element, checked in value.items() %}
+                <li>
+                  <input type="checkbox" id="{{ element|replace(' ', '') }}" class="filter-item__input" name="{{ element }}" {% if checked == "on"%}checked{% endif %}/>
+                  <label for="{{ element|replace(' ', '') }}">{{ element }}</label>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    <input type="Submit" id="start-button" value="Search"/>
+  </form>
+</div>
+</section>
+<script type="text/javascript">
+  $(function() {
+    $('a#process_input').bind('click', function() {
+    $.getJSON('/config_stack', {
+      stack: $('input[name="stack"]').val(),
+    }, function(data) {
+      var skill = data.result
+      if (skill.startsWith('-')){
+        if($("#result").text().indexOf(skill.slice(1,)) > -1){
+          showSkillAlert();
+        } else {
+          $("#result").append("<span class='skill negative'>"+skill.slice(1,)+"</span>");
+          clearTextInput();
+          listenSkillsChange();
+        }
+      } else {
+        if($("#result").text().indexOf(skill) > -1){
+          showSkillAlert();
+        } else {
+          $("#result").append("<span class='skill positive'>"+skill+"</span>");
+          clearTextInput();
+          listenSkillsChange();
+        }
+      }
+    });
+    return false;
+    });
+  });
+
+  $( document ).ready(function() {
+    listenSkillsChange();
+    paginateSuggestions();
+    $('.refresh').on('click', function(){
+      $('.refresh svg').animateRotate(360, 500);
+      paginateSuggestions();
+    });
+  });
+ 
+
+ function paginateSuggestions(){
+  $('.suggested-skills').empty();
+  $.getJSON('/paginate_suggestions', function(data) {
+        $(data.result).each(function(index){
+          $(".suggested-skills").append("<span class='skill suggested'>"+this+"</span>");
+        });
+        useSuggestions();
+      });
+ };
+
+ function useSuggestions(){
+  $('.suggested').bind('click', function(){
+      $.get('/add_suggested_skill', {
+        skill: $(this)[0].innerText,
+      });
+      $("#result").append("<span class='skill positive'>"+$(this)[0].innerText+"</span>");
+      $(this).remove();
+      listenSkillsChange();
+      paginateSuggestions();
+  })
+ };
+
+  function listenSkillsChange() {
+    $('.skill').bind('click', function() {
+    if ($(this).hasClass('negative')){
+      $(this).remove();
+      $.getJSON('/remove_skill', {
+        skill: "-"+$(this).text(),
+      });
+    } else if ($(this).hasClass('positive')) {
+      $(this).remove();
+      $.getJSON('/remove_skill', {
+        skill: $(this).text(),
+      });
+    }
+    return false;
+    });
+  };
+
+  function clearTextInput() {
+    $('#skill-input').val('');
+  };
+
+  function showSkillAlert() {
+    $('.skill-error').fadeIn(200);
+    setTimeout(function(){
+      $('.skill-error').fadeOut(500);
+    }, 1500);
+  };
+
+  $.fn.animateRotate = function(angle, duration, easing, complete) {
+    return this.each(function() {
+      var $elem = $(this);
+
+      $({deg: 0}).animate({deg: angle}, {
+        duration: duration,
+        easing: easing,
+        step: function(now) {
+          $elem.css({
+             transform: 'rotate(' + now + 'deg)'
+           });
+        },
+        complete: complete || $.noop
+      });
+    });
+  };
+</script>
+{% endblock %}
