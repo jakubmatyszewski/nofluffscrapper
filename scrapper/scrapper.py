@@ -42,10 +42,12 @@ def read_options():
 
     _no_stack, _stack = [], []
     for key in redis_client.scan_iter('stack:*'):
-        if (skill := ''.join(key.split(':')[1:]).startswith('-')):
+        key_formatted = ''.join(key.split(':')[1:])
+        if (key_formatted.startswith('-')):
+            skill = key_formatted[1:]
             _no_stack.append(skill)
         else:
-            skill = ''.join(key.split(':')[1:])
+            skill = key_formatted
             _stack.append(skill)
     return _location, _category, _seniority, _stack, _no_stack
 

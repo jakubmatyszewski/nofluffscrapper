@@ -1,6 +1,6 @@
 import time
-from datetime import datetime
 import redis
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
@@ -29,6 +29,7 @@ class Scrapper:
     def __init__(self):
         self.not_specified = []
         self.report = []
+        self.current_page = 1
 
         self.open_browser()
         self.set_language_to_english()
@@ -121,7 +122,7 @@ class Scrapper:
             company = description.find_element_by_tag_name('dd').text
         _url = self.driver.current_url
         salary = self.driver.find_element_by_tag_name('nfj-posting-salaries').text
-        return f'{position} @ {company}\n{_url}\n{salary}'
+        return position, company, _url, salary
 
     def check_if_i_am_suited(self, stack, nonos=[]):
         reqs = self.get_requirements()
@@ -134,16 +135,23 @@ class Scrapper:
                 self.not_specified.append(req)
                 reqs[i] = 0
         rate = sum(reqs) / len(reqs)
-        if rate > 0.5:
+        if rate > 0.4:
             now = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
-            description = self.get_description()
+            position, company, _url, salary = self.get_description()
+            # -- email only --
+            description = f'{position} @ {company}\n{_url}\n{salary}'
             self.report.append(f"{description}\nSuited in {rate:.2f}/1.\n\n")
-            redis_client.hset(f'result:{now}', 'description', description)
+            # --/ email only --
+            redis_client.hset(f'result:{now}', 'position', position)
+            redis_client.hset(f'result:{now}', 'company', company)
+            redis_client.hset(f'result:{now}', 'url', _url)
+            redis_client.hset(f'result:{now}', 'salary', salary)
         return False
 
     def check_offers(self, stack, nonos):
         is_it_last_page = False
         while is_it_last_page is False:
+            time.sleep(1)
             offers = self.driver.find_elements_by_class_name('posting-list-item')
             for i in range(len(offers)):
                 self.check_if_on_list_view()
@@ -167,13 +175,16 @@ class Scrapper:
 
     def page_flipping(self):
         try:
+            self.current_page += 1
             last_page = self.driver.find_elements_by_class_name('page-link')[-2]
-            for i in range(2, int(last_page.text)):
-                page_link = self.driver.find_element_by_xpath("//*[contains(text(), '{}') and @class='page-link']".format(i))
+            if self.current_page < int(last_page.text):
+                page_link = self.driver.find_element_by_xpath(f"//*[contains(text(), '{self.current_page}') and @class='page-link']")
                 self.driver.execute_script(
                     f"window.scrollTo(0, {page_link.rect['y']-200})")
                 page_link.click()
-            return True
+                return False
         except Exception as e:
-            print('Just one page available.')
+            print(e)
+            print('Just one page available.', flush=True)
             return True
+        return True
