@@ -2,17 +2,41 @@
 {% block content %}
 <section class="stack" style="margin-bottom: 40px;">
   {% for key, value in results.items() %}
-    <h1>{{ key }}</h1>
-    {% for offer in value %}
-      <div>
-        <a href="{{offer['url']}}">
-          <p class="result-offer">{{ offer['position'] }} @ {{ offer['company'] }}</p>
-        </a>
+    <div class="results">
+      <div class="result-headline">
+        <h1>{{ key }}</h1>
+        <span class="filters-wrapper">
+          <i class="material-icons filters-ico">list</i>
+          <span class="filters-details">
+            {% for type, filter in value['filters'].items() %}
+            <div class="filter-type">
+              <span class="filter-type_key">{{ type|title }}</span>
+              {% for element in filter %}
+                <span class="filter-type_detail">
+                  {{ element }}
+                </span>
+              {% endfor %}
+            </div>
+            {% endfor %}
+          </span>
+        </span>
       </div>
-      <div>{{ offer['salary'] }}</div>
-      <time>{{ key }} - {{ offer['hour'] }}</time>
       <hr>
-    {% endfor %}
+      {% for offer in value['offers'] %}
+        <div>
+          <a href="{{offer['url']}}">
+            <p class="result-offer">{{ offer['position'] }} @ {{ offer['company'] }}</p>
+          </a>
+        </div>
+        <div>{{ offer['salary'] }}</div>
+        <hr>
+      {% endfor %}
+    </div>
   {% endfor %}
 </section>
+<script>
+  $('.filters-ico').on('click', function() {
+    $(this).siblings('.filters-details').toggleClass('filters-shown');
+  })
+</script>
 {% endblock %}

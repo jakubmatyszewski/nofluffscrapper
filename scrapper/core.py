@@ -1,4 +1,5 @@
 import time
+import json
 import redis
 from datetime import datetime
 from selenium import webdriver
@@ -29,7 +30,9 @@ class Scrapper:
     def __init__(self):
         self.not_specified = []
         self.report = []
+        self.offers = []
         self.current_page = 1
+        self.now = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
 
         self.open_browser()
         self.set_language_to_english()
@@ -64,10 +67,13 @@ class Scrapper:
          if button.text == 'Apply'][0].click()
 
     def get_filters_done(self,
-                         cities=['warszawa'],
-                         seniority=['trainee', 'junior'],
+                         locations=[],
+                         seniority=[],
                          categories=[]
                          ):
+        self.filter_config = {'location': locations,
+                              'category': categories,
+                              'seniority': seniority}
         filters = self.driver.find_elements_by_class_name('filter-name')
         for filtr in filters:
             if filtr.text == 'Location':
@@ -79,7 +85,7 @@ class Scrapper:
 
         location.click()
         for button in self.driver.find_elements_by_class_name('filters-btn'):
-            if button.text in cities:
+            if button.text in locations:
                 button.click()
         self.apply_button()
 
@@ -136,16 +142,15 @@ class Scrapper:
                 reqs[i] = 0
         rate = sum(reqs) / len(reqs)
         if rate > 0.4:
-            now = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
             position, company, _url, salary = self.get_description()
             # -- email only --
             description = f'{position} @ {company}\n{_url}\n{salary}'
             self.report.append(f"{description}\nSuited in {rate:.2f}/1.\n\n")
             # --/ email only --
-            redis_client.hset(f'result:{now}', 'position', position)
-            redis_client.hset(f'result:{now}', 'company', company)
-            redis_client.hset(f'result:{now}', 'url', _url)
-            redis_client.hset(f'result:{now}', 'salary', salary)
+            self.offers.append({'position': position,
+                                'company': company,
+                                'url': _url,
+                                'salary': salary})
         return False
 
     def check_offers(self, stack, nonos):
@@ -172,6 +177,9 @@ class Scrapper:
             is_it_last_page = self.page_flipping()
         for skill in self.not_specified:
             redis_client.set(f'skillproposal:{skill}', skill)
+
+        result_data = {'filters': self.filter_config, 'offers': self.offers}
+        redis_client.set(f'result:{self.now}', json.dumps(result_data))
 
     def page_flipping(self):
         try:

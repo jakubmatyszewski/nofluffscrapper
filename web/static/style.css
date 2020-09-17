@@ -158,4 +158,56 @@ nav h1 { margin: 0; }
     margin: 5px 0;
 }
 
-time { color: #808080; }
+.result-headline {
+    align-items: baseline;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.result-headline h1 {
+    margin: 0;
+}
+
+.filters-wrapper {
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transition: .5s ease-in;
+}
+
+.filters-ico { 
+    cursor: pointer;
+    float: right;
+    padding: 2px 3px;
+}
+
+.filters-details {
+    display: inline-block;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.filters-shown {
+    padding: 0 40px 15px 15px;
+    padding-right: 40px;
+    height: 100%;
+    width: 100%;
+}
+
+.filter-type_key {
+    display: inline-block;
+    font-weight: bold;
+    width: 60px;
+}
+.filter-type_detail {
+    padding: 0 5px;
+}
+
+.filter-type_key + .filter-type_detail {
+    margin-left: 20px;
+}
